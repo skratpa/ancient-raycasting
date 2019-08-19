@@ -1,6 +1,6 @@
 var FOV_ANGLE = 60 * (Math.PI / 180);
 var NUM_RAYS = 0;
-const WALL_STRIP_WIDTH = 10; 
+const WALL_STRIP_WIDTH = 5; 
 
 /**
  * Normalize an angle.
@@ -11,10 +11,8 @@ const WALL_STRIP_WIDTH = 10;
  */
 function normalizeAngle(angle_) {
     angle_ = angle_ % (2 * Math.PI);
-    return (angle_ < 0) ? ((2 * Math.PI) + angle_) : (angle_);
+    return ((angle_ < 0) ? ((2 * Math.PI) + angle_) : (angle_));
 } // normalizeAngle
-
-
 
 /**
  * Get the distance between two points.

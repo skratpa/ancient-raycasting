@@ -136,10 +136,8 @@ class Game {
 
         $.map.renderMinimap();
 
-        $.clients.renderMinimap();
+        $.self.render();
 
-        for (let rIt = 0; rIt < $.rays.length; rIt++) {
-            $.rays[rIt].renderMinimap();
-        }
+        $.clients.renderMinimap();
     } // render
 } // _game

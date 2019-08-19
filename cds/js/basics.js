@@ -8,17 +8,6 @@ function timestamp() {
 } // timestamp
 
 /**
- * Print an error in the console.
- *
- * @param {String} error_ - The error-object
- * @param {String} [message_] - The message which should also be printed out
- */
-function perror(error_, message_) {
-    // Print the error-message in the console
-    console.log(error_, (message_) ? (message_) : (""));
-} // perror
-
-/**
  * Create a new cookie.
  *
  * @param {String} cName_ - The name of the cookie
@@ -52,9 +41,9 @@ function getCookie(cName_) {
 } // getCookie
 
 /**
- * A simple 2d-Vector-Class to enable movement.
+ * A simple 2d-Vector-Class.
  */
-class _vec {
+class vec2 {
     /**
      * A higher-level function used to apply a defined funciton on both values.
      *
@@ -162,9 +151,9 @@ class _vec {
      * @param {Number} limit_ - The max value
      */
     static limit(vector_, limit_) {
-        var mSq = _vec.magSq(vector_);
+        var mSq = vec2.magSq(vector_);
         if (mSq > limit_ * limit_) {
-            return (_vec.mult(_vec.div(vector_, Math.sqrt(mSq)), limit_));
+            return (vec2.mult(vec2.div(vector_, Math.sqrt(mSq)), limit_));
         }
     } // limit
-} // _vec
+} // vec2

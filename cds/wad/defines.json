@@ -1,0 +1,38 @@
+{
+	"static": {
+		"inclbasepaths": {
+			"client": "/cds",
+			"static": "/"
+		},
+
+		"inclbasetypes": {
+			"html": { "p": "/html/", "e": ".html" },
+			"style": { "p": "/css/", "e": ".css" },
+			"json": { "p": "/wad/", "e": ".json" },
+			"script": { "p": "/js/", "e": ".js" },
+			"img": { "p": "/img/", "e": ".png" },
+			"sound": { "p": "/sound/", "e": ".mp3" }
+		}
+	},
+
+	"includes": [
+		{ "t": "html", "p": "main", "e": "container"						},
+
+		{ "t": "style", "p": "main"											},
+
+		{ "t": "script", "p": "socket", "s": "/socket.io/socket.io.js"		},
+		{ "t": "script", "p": "basics" 										},
+		{ "t": "script", "p": "clients" 									},
+		{ "t": "script", "p": "game" 										},
+		{ "t": "script", "p": "input" 										},
+
+		{ "t": "script", "p": "map" 										},
+		{ "t": "script", "p": "window" 										},
+		{ "t": "script", "p": "render" 										},		
+		{ "t": "script", "p": "fr" 											},
+
+		{ "t": "img", "p": "self_arms"										},
+		{ "t": "img", "p": "block_material"									},
+		{ "t": "img", "p": "wall_material"									}
+	]
+}

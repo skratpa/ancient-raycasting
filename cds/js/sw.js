@@ -1,35 +1,18 @@
-// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-// CONSTANT VARIABLES
-// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+/* ============================================================================= */
+/*              CONSTANT VARIABLES AND SHOPRTCUTS                                */
+/* ============================================================================= */
 
-/**
- * This array is the resources-list, containing all files, which will then be
- * loaded using the sw-import-function. Each entry has to contain an p-attribute, 
- * containing the name of the file with the file extension.
- */
-let INCLUDES = [
-    { "p": "/socket.io/socket.io.js", t: "js" },
-    { "p": "main.css" },
-    { "p": "basics.js" },
-    { "p": "window.js" },
-    { "p": "map.js" },
-    { "p": "xrender.js" },
-    { "p": "input.js" },
-    { "p": "clients.js" },
-    { "p": "game.js" },
-    { "p": "fr.js" },
-]; // INCLUDES
+const RES_FILE_PATH = "/cds/wad/defines.json";
 
-// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-// SHORTCUT FUNCTIONS
-// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+const stdio = {
+    printf: (msg_, pref_) => { console.log((!!pref_ ? pref_ : "[*]") + " " + msg_) },
+    perror: (msg_, err_) => { console.log(msg_);
+        console.dir(err_); }
+};
 
-// Redefine the console.log-funciton.
-const printf = (message_, prefix_) => { console.log((prefix_ || "[*]") + " " + message_) };
-
-// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-// CONTENT
-// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+/* ============================================================================= */
+/*              MAIN OBJECT                                                      */
+/* ============================================================================= */
 
 /**
  * The fundamental ServiceWorker and ResourceLoader, which is used to install all
@@ -46,144 +29,303 @@ const _sw = {
     }, // cache
 
     /**
-     * This function is used to recursively import all resources, defined in 
-     * INCLUDES using xmlRequests.
+     * The registry of the game, containing all registers for the different objects.
      */
-    import: function() {
+    reg: {
+        structs: {},
+        entities: {},
+        resources: {}
+    }, // reg
+
+    /**
+     * Load files. This function will call the different subfunctions,
+     * depending on the type of the file/resource.
+     *
+     *
+     * @param {Object[]} filesList_ - An array containing all files, which should be loaded
+     * @param {String} filesList_.t - The type of file
+     * @param {String} filesList_.p - The name of the file
+     * @param {Object} filesList_.i - Additional information
+     */
+    import: function(paths_, types_, filesList_, flg_ = 0) {
         var create = (tag_) => { return document.createElement(tag_) };
         var append = (ele_) => { document.body.appendChild(ele_) };
-        var text = (url_) => {
-            return (new Promise((res, rej_) => {
+        var loadText = (url_) => {
+            return (new Promise((res, rej) => {
                 let r = new XMLHttpRequest();
                 r.open("GET", url_, true);
-                r.onload = () => { res(r.response) };
-                r.onerror = () => { rej() };
-
+                r.onload = () => {
+                    res(r.response);
+                };
+                r.onerror = rej;
                 r.send();
             }));
         };
 
-        function request(file_) {
+        /**
+         * This function is used to load and setup resources on the clientside.
+         *
+         * @param {String} path_ - The path to the current file
+         * @param {Object} data_ - The current file-data
+         */
+        function xmlRequest(path_, data_) {
             return (
                 new Promise((res, rej) => {
-                    if (file_.t) {
-                        var t = file_.t;
-                        var path = file_.p;
-                    }
-                    else {
-                        var sel = file_.p.split(".");
-                        var t = sel[1];
-                        var path = "/cds/" + sel[1] + "/" + file_.p;
-                    }
-
-                    if (t == "js") {
-                        let loadScript = create("script");
-                        loadScript.onload = res;
-                        loadScript.onerror = () => {
-                            rej("failed while loading \"" + path + "\"");
-                        };
-                        loadScript.src = path;
-                        append(loadScript);
-                    }
-                    if (t == "html") {
-                        text(path).then((content_) => {
-                            document.getElementById(data_.e).innerHTML = content_;
-                            res();
-                        }).catch((e_) => {
-                            rej("failed while loading \"" + path + "\"");
-                        });
-                    }
-                    if (t == "css") {
-                        let loadStyle = create("link");
-                        loadStyle.type = "text/css";
-                        loadStyle.rel = "stylesheet";
-                        loadStyle.onload = res;
-                        loadStyle.onerror = () => {
-                            rej("failed while loading \"" + path + "\"");
-                        };
-                        loadStyle.href = path;
-                        append(loadStyle);
-                    }
-                    if (t == "json") {
-                        text(path).then((content_) => {
-                            window[file_.o] = JSON.parse(content_);
-                            res();
-                        }).catch(() => {
-                            rej("failed while loading \"" + path + "\"");
-                        });
-                    }
-                    if (t == "png") {
-                        let loadImage = new Image();
-                        loadImage.src = path;
-                        loadImage.addEventListener("load", () => {
-                            _sw.cache.images[sel[0]] = loadImage;
-                            res();
-                        });
-                        loadImage.addEventListener("error", () => {
-                            rej("failed while loading \"" + path + "\"");
-                        });
-                    }
-                    if (t == "mp3") {
-                        var context = new(window.AudioContext || window.webkitAudioContext)();
-                        var request = new XMLHttpRequest();
-                        request.open("GET", path, true);
-                        request.responseType = "arraybuffer";
-                        request.onload = () => {
-                            context.decodeAudioData(request.response, (buffer_) => {
-                                _sw.cache.audio[sel[0]] = buffer_;
+                    switch (data_.t) {
+                        case ("script"):
+                            let loadScript = create("script");
+                            loadScript.onload = res;
+                            loadScript.onerror = rej;
+                            loadScript.src = path_;
+                            append(loadScript);
+                            break;
+                            // 
+                        case ("html"):
+                            loadText(path_).then((content_) => {
+                                document.getElementById(data_.e).innerHTML = content_;
+                                res();
+                            }).catch(rej);
+                            break;
+                            // 
+                        case ("style"):
+                            let loadStyle = create("link");
+                            loadStyle.type = "text/css";
+                            loadStyle.rel = "stylesheet";
+                            loadStyle.onload = res;
+                            loadStyle.onerror = rej;
+                            loadStyle.href = path_;
+                            append(loadStyle);
+                            break;
+                            // 
+                        case ("json"):
+                            loadText(path_).then((content_) => {
+                                window[data_.o] = JSON.parse(content_);
+                                res();
+                            }).catch(rej);
+                            break;
+                            // 
+                        case ("img"):
+                            let loadImage = new Image();
+                            loadImage.src = path_;
+                            loadImage.addEventListener("load", () => {
+                                _sw.cache.images[data_.p] = loadImage;
                                 res();
                             });
-                        };
-                        request.onerror = () => {
-                            rej("failed while loading \"" + path + "\"");
-                        };
-                        request.send();
+                            loadImage.onerror = rej;
+                            break;
+                            // 
+                        case ("spr"):
+                            let loadSprite = new Image();
+                            loadSprite.src = path_;
+                            loadSprite.addEventListener("load", () => {
+                                _sw.cache.images[data_.p] = loadSprite;
+                                _sw.cache.sprites[data_.p] = new Sprite(data_.p, { x: data_.x, y: data_.y });
+                                res();
+                            });
+                            loadSprite.onerror = rej;
+                            break;
+                            // 
+                        case ("audio"):
+                            var context = new(window.AudioContext || window.webkitAudioContext)();
+                            var request = new XMLHttpRequest();
+                            request.open("GET", path_, true);
+                            request.responseType = "arraybuffer";
+                            request.addEventListener("load", () => {
+                                context.decodeAudioData(request.response, (buffer_) => {
+                                    _sw.cache.audio[data_.p] = buffer_;
+                                    res();
+                                });
+                            });
+                            request.onerror = rej;
+                            request.send();
+                            break;
+                            // 
+                        case ("reg"):
+                            loadText(path_).then((content_) => {
+                                let jsonCont = JSON.parse(content_);
+                                let sprLoader = [];
+
+                                for (let eleIt in jsonCont) {
+                                    _sw.reg[data_.o] = jsonCont;
+
+                                    sprLoader.push({
+                                        t: "spr",
+                                        p: jsonCont[eleIt].spr.ite,
+                                        x: jsonCont[eleIt].size.x,
+                                        y: jsonCont[eleIt].size.y
+                                    });
+                                }
+
+                                _sw.import(paths_, types_, sprLoader).then(() => {
+                                    res();
+                                }).catch(rej);
+                            }).catch(rej);
+                            break;
+                            // 
+                        case ("rrp"):
+                            loadText(path_).then((content_) => {
+                                let RRPcontent = JSON.parse(content_);
+                                let RRPimgLoader = [];
+
+                                for (let rrpIt in RRPcontent) {
+                                    _sw.reg.resources[rrpIt] = {};
+
+                                    for (let eleIt in RRPcontent[rrpIt]) {
+                                        if (!RRPcontent[rrpIt][eleIt].sprite) continue;
+
+                                        // console.log(eleIt, content_[catIt][eleIt]);
+                                        _sw.reg.resources[rrpIt][eleIt] = RRPcontent[rrpIt][eleIt];
+
+                                        RRPimgLoader.push({
+                                            t: "img",
+                                            p: _sw.reg.resources[rrpIt][eleIt].sprite
+                                        });
+                                    }
+                                }
+
+                                _sw.import(paths_, types_, RRPimgLoader).then(() => {
+                                    res();
+                                }).catch(rej);
+                            }).catch(rej);
+                            break;
+                            // 
+                        case ("hip"):
+                            loadText(path_).then((content_) => {
+                                let HIPcontent = JSON.parse(content_);
+                                let loadImg = HIPcontent.placeimages.map((ele) => {
+                                    return ({ t: "img", p: ele.img });
+                                });
+
+                                _sw.import(paths_, types_, loadImg).then(() => {
+                                    for (let imgIt = 0; imgIt < HIPcontent.placeimages.length; imgIt++) {
+                                        let img = HIPcontent.placeimages[imgIt];
+                                        document.getElementById(img.id).style["background-image"] = "url(" + _sw.cache.images[img.img].src + ")";
+                                    }
+                                    res();
+                                });
+                            }).catch(rej);
+                            break;
                     }
                 })
             );
-        } // request
+        } // xmlRequest
 
         return (
             new Promise((res, rej) => {
+                let flAmt = filesList_.length;
+
                 // Load a list of files recursively
                 function loadFile(files_) {
-                    // If all files have been loaded successfully
-                    if (!files_[0]) {
-                        res();
+                    if (flg_) {
+                        document.getElementById("lnd").style.width = (100 - ((files_.length / flAmt) * 100)) + "%";
                     }
 
-                    request(files_.shift()).then(() => {
+                    // If all files have been loaded successfully
+                    if (files_.length == 0) {
+                        res();
+                        return;
+                    }
+
+                    // Take the first file
+                    let curFl = files_.shift();
+
+                    // The path to the file, that will be set up now
+                    let flPth = "";
+
+                    // ============================================
+                    // 1. Set the basic path of the source
+
+                    if (curFl.s) {
+                        flPth = curFl.s;
+                    } else {
+                        if (!curFl.l) curFl.l = "client";
+                        if (!paths_[curFl.l]) {
+                            rej("couldn't process source-path of an element:" + curFl.l);
+                        }
+
+                        flPth += paths_[curFl.l];
+
+                        // ============================================
+                        // 2. Set the type-specific folder of this source and set the file-ending
+
+                        if (!types_[curFl.t]) {
+                            rej("couldn't process type of an element:" + curFl.t);
+                        }
+
+                        flPth = flPth + (types_[curFl.t].p + curFl.p + types_[curFl.t].e);
+                    }
+
+                    // Use the specified loading-function
+                    xmlRequest(flPth, curFl).then(() => {
+                        // Load the next file
                         loadFile(files_);
                     }).catch((e) => {
-                        rej(e);
+                        stdio.perror("failed while loading \"" + flPth + "\"", e);
                     });
                 } // loadFile
 
                 // Start the recursive loading-loop
-                loadFile(INCLUDES);
+                loadFile(filesList_);
             })
         );
     }, // import
+
+    /**
+     * When executing this function, all necessary resources as defined in the wad.json-file, are going to be imported from the server and
+     * included into the website.
+     */
+    install: function() {
+        return (new Promise((res, rej) => {
+            fetch(RES_FILE_PATH)
+                .then((response_) => {
+                    return (response_.json());
+                }).then((define_) => {
+                    window.__InclBasePaths = define_.static.inclbasepaths;
+                    window.__InclBaseTypes = define_.static.inclbasetypes;
+
+                    console.log("Load files from \"" + RES_FILE_PATH + "\"");
+
+                    // Load all specified files
+                    _sw.import(__InclBasePaths, __InclBaseTypes, define_.includes, 1).then(() => {
+                        res();
+                    }).catch((e_) => {
+                        rej("LOADING :: " + e_);
+                    });
+                }).catch((e_) => {
+                    rej("could not load resource file [" + e_ + "]");
+                });
+        }));
+    } // install
 }; // _sw
 
-/**
- * As soon, as the main code is loaded, execute the attached function.
- */
+
+
+/* ============================================================================= */
+/*              MAIN OBJECT                                                      */
+/* ============================================================================= */
+
 document.addEventListener("readystatechange", () => {
     if (document.readyState == "complete") {
+        // Reset the framework-container
         window.$ = {};
+
         let timenow = performance.now();
 
-        printf("Starting Load-Proc...");
-
         // Install all required resources
-        _sw.import().then(() => {
-            printf("Finished Load-Proc. (" + (performance.now() - timenow) + "ms)");
+        _sw.install().then(() => {
+            console.log("Finished loading. [" + (performance.now() - timenow) + "ms]");
+
+            // Change the current windowframe and delete the pre-container
+            document.getElementById("pre").style["display"] = "none";
+            document.getElementById("container").style["top"] = "0";
+            document.getElementById("container").style["transition-duration"] = "0ms";
+            var elem = document.getElementById("pre");
+            elem.parentNode.removeChild(elem);
 
             // Setup the framework
             $.init();
         }).catch((e_) => {
-            printf(e_, "[!]");
+            stdio.printf(e_, "[!]");
         });
     }
 }); // onreadystatechange

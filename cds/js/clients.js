@@ -22,6 +22,8 @@ class Entity {
      * @param {Number} dt_ - The time since the last frame
      */
     update(dt_) {
+        this.rotationAngle += this.turnDirection * this.rotationSpeed;
+
         var moveStep = this.walkDirection * this.moveSpeed;
 
         var newPlayerX = this.pos.x + Math.cos(this.rotationAngle) * moveStep;
@@ -138,5 +140,8 @@ class Clients {
         for (let cliIt in this.clients) {
             this.clients[cliIt].renderMinimap();
         }
+
+        
+        for (let rIt = 0; rIt < $.rays.length; rIt++) { $.rays[rIt].renderMinimap(); }
     } // renderMinimap
 } // Clients

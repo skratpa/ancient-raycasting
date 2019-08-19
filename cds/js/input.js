@@ -47,16 +47,28 @@ class Keyboard {
      */
     processInput() {
         // Walk forwards
-        if (this.check(87)) {
+        if (this.check(38)) {
             $.clients.clients["player"].walkDirection = +1;
         }
         // Walk backwards
-        else if (this.check(83)) {
+        else if (this.check(40)) {
             $.clients.clients["player"].walkDirection = -1;
         }
         // Stop walking
         else {
             $.clients.clients["player"].walkDirection = 0;
+        }
+
+        // Turn left
+        if(this.check(37)) {
+            $.clients.clients["player"].turnDirection = -1;
+        }
+        // Turn right
+        else if(this.check(39)) {
+            $.clients.clients["player"].turnDirection = 1;
+        }
+        else {
+            $.clients.clients["player"].turnDirection = 0;
         }
     } // processInput
 } // Keyboard
@@ -95,10 +107,10 @@ class Mouse {
      * Process mouse-inputs.
      */
     processInput() {
-        if (this.del.x != 0) {
-            console.log(this.del.x);
-            $.clients.clients["player"].rotationAngle -= (this.del.x / $.window.size.x) * this.sensitivity;
-        }
+        // if (this.del.x != 0) {
+        //     console.log(this.del.x);
+        //     $.clients.clients["player"].rotationAngle -= (this.del.x / $.window.size.x) * this.sensitivity;
+        // }
 
         this.del = { x: 0, y: 0 };
     } // processInput
