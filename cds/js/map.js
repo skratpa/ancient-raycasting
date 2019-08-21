@@ -4,7 +4,7 @@ const MINIMAP_SCALE_FACTOR = 0.2;
 let defgrid = [
     [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
     [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2],
-    [2, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 2],
+    [2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2],
     [2, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 2],
     [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 2],
     [2, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 2],
@@ -14,12 +14,6 @@ let defgrid = [
     [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2],
     [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
 ];
-
-let BLOCKS = {
-    "0": "",
-    "2": { type: "material", material: "wall_material" },
-    "1": { type: "material", material: "block_material" }
-};
 
 /**
  * This class is used to update and render the map.
@@ -66,7 +60,7 @@ class Map {
         var xIt = 0;
 
         // start first ray subtracting half of the FOV
-        var rayAngle = $.clients.clients["player"].rotationAngle - (FOV_ANGLE / 2);
+        var rayAngle = $.player.rotationAngle - (FOV_ANGLE / 2);
 
         NUM_RAYS = Math.floor($.window.size.x / 5);
         $.rays = [];
@@ -90,11 +84,10 @@ class Map {
         // loop every ray in the array of rays
         for (var rayIt = 0; rayIt < NUM_RAYS; rayIt++) {
             var ray = $.rays[rayIt];
-            var player = $.clients.clients["player"];
+            var player = $.player;
             var size = $.window.size;
 
             let tile = { x: Math.floor(ray.wallHit.x / TILE_SIZE), y: Math.floor(ray.wallHit.y / TILE_SIZE) };
-            let block = BLOCKS[this.grid[tile.x][tile.y] + ""];
 
             // get the perpendicular distance to the wall to fix fishbowl distortion
             var correctWallDistance = ray.distance * Math.cos(ray.rayAngle - player.rotationAngle);
@@ -105,49 +98,20 @@ class Map {
             // projected wall height
             var wallStripHeight = (TILE_SIZE / correctWallDistance) * distanceProjectionPlane;
 
-            if (block.type == "color") {
-                // compute the transparency based on the wall distance
-                var alpha = (170 / correctWallDistance);
+            // compute the transparency based on the wall distance
+            var alpha = (170 / correctWallDistance);
 
-                // render a rectangle with the calculated wall height
-                $.canvas.ctx.beginPath();
-                var shade = (255 * alpha);
-                // $.canvas.ctx.fillStyle = ("rgb(" + shade + ", " + shade + ", " + shade + ")");
-                $.canvas.ctx.fillStyle = block.color;
-                $.canvas.ctx.rect(
-                    rayIt * WALL_STRIP_WIDTH,
-                    (size.y / 2) - (wallStripHeight / 2),
-                    WALL_STRIP_WIDTH,
-                    wallStripHeight
-                );
-                $.canvas.ctx.fill();
-            } else if (block.type == "material") {
-                let material = _sw.cache.images[block.material];
-                let matSize = { x: material.width, y: material.height };
-
-                let hitBlock = {
-                    x: (Math.floor(ray.wallHit.x / TILE_SIZE) * TILE_SIZE) + (TILE_SIZE / 2),
-                    y: (Math.floor(ray.wallHit.y / TILE_SIZE) * TILE_SIZE) + (TILE_SIZE / 2)
-                };
-                let del = {
-                    x: hitBlock.x - ray.wallHit.x,
-                    y: hitBlock.y - ray.wallHit.y
-                };
-
-                let smaller = (Math.abs(del.x) < Math.abs(del.y)) ? (del.x) : (del.y);
-                let grade = Math.floor(((smaller + (TILE_SIZE / 2)) / TILE_SIZE) * matSize.x);
-                // console.log(grade);
-
-                $.canvas.ctx.drawImage(
-                    material,
-                    grade, 0,
-                    1, matSize.y,
-                    (rayIt * WALL_STRIP_WIDTH),
-                    (size.y / 2) - (wallStripHeight / 2),
-                    WALL_STRIP_WIDTH,
-                    wallStripHeight
-                );
-            }
+            // render a rectangle with the calculated wall height
+            $.canvas.ctx.beginPath();
+            var shade = (255 * alpha);
+            $.canvas.ctx.fillStyle = ("rgb(" + shade + ", " + shade + ", " + shade + ")");
+            $.canvas.ctx.rect(
+                rayIt * WALL_STRIP_WIDTH,
+                (size.y / 2) - (wallStripHeight / 2),
+                WALL_STRIP_WIDTH,
+                wallStripHeight
+            );
+            $.canvas.ctx.fill();
         }
     } // render
 

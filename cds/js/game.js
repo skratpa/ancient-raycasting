@@ -111,9 +111,8 @@ class Game {
      */
     update(deltime_) {
         $.keyboard.processInput();
-        $.mouse.processInput();
 
-        $.clients.update();
+        $.player.update();
 
         $.map.castRays();
     } // update
@@ -134,10 +133,15 @@ class Game {
 
         $.map.render();
 
+        // Render the basic minimap
         $.map.renderMinimap();
 
-        $.self.render();
+        // Render the player on the minimap
+        $.player.renderMinimap();
 
-        $.clients.renderMinimap();
+        // Render the rays on the minimap
+        for(let rIt = 0; rIt < $.rays.length;rIt++) {
+            $.rays[rIt].renderMinimap();
+        }
     } // render
 } // _game

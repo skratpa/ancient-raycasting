@@ -45,7 +45,7 @@ class Ray {
         var intercept = { x: 0, y: 0 };
         var step = { x: 0, y: 0 };
 
-        let pos = $.clients.clients["player"].pos;
+        let pos = $.player.pos;
 
         var size = $.map.fieldsize;
 
@@ -151,10 +151,10 @@ class Ray {
      */
     renderMinimap() {
         $.canvas.ctx.beginPath();
-        $.canvas.ctx.strokeStyle = "red";
+        $.canvas.ctx.strokeStyle = "#f00";
         $.canvas.ctx.moveTo(
-            MINIMAP_SCALE_FACTOR * $.clients.clients["player"].pos.x,
-            MINIMAP_SCALE_FACTOR * $.clients.clients["player"].pos.y
+            MINIMAP_SCALE_FACTOR * $.player.pos.x,
+            MINIMAP_SCALE_FACTOR * $.player.pos.y
         );
         $.canvas.ctx.lineTo(
             MINIMAP_SCALE_FACTOR * this.wallHit.x,

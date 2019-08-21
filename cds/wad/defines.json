@@ -20,7 +20,6 @@
 
 		{ "t": "style", "p": "main"											},
 
-		{ "t": "script", "p": "socket", "s": "/socket.io/socket.io.js"		},
 		{ "t": "script", "p": "basics" 										},
 		{ "t": "script", "p": "clients" 									},
 		{ "t": "script", "p": "game" 										},
@@ -29,10 +28,6 @@
 		{ "t": "script", "p": "map" 										},
 		{ "t": "script", "p": "window" 										},
 		{ "t": "script", "p": "render" 										},		
-		{ "t": "script", "p": "fr" 											},
-
-		{ "t": "img", "p": "self_arms"										},
-		{ "t": "img", "p": "block_material"									},
-		{ "t": "img", "p": "wall_material"									}
+		{ "t": "script", "p": "fr" 											}
 	]
 }
