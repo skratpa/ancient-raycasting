@@ -1,12 +1,11 @@
 /**
- * A simple class representing a single client.
+ * A simple class representing the player.
  */
-class Entity {
+class Player {
     /**
-     * Create a new client.
+     * Create a new Player.
      */
-    constructor(data_) {
-        // The position of the Client
+    constructor() {
         this.pos = { x: 100, y: 100 };
         this.radius = 4;
         this.turnDirection = 0; // -1 if left, +1 if right
@@ -17,7 +16,7 @@ class Entity {
     } // constructor
 
     /**
-     * Update this entity.
+     * Update this player.
      *
      * @param {Number} dt_ - The time since the last frame
      */
@@ -36,7 +35,7 @@ class Entity {
     } // update
 
     /**
-     * Display this entity on the minimap.
+     * Display this player on the minimap.
      */
     renderMinimap() {
         $.canvas.ctx.beginPath();
@@ -62,4 +61,4 @@ class Entity {
         );
         $.canvas.ctx.stroke();
     } // renderMinimap
-} // Entity
+} // Player

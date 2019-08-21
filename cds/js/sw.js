@@ -40,12 +40,6 @@ const _sw = {
     /**
      * Load files. This function will call the different subfunctions,
      * depending on the type of the file/resource.
-     *
-     *
-     * @param {Object[]} filesList_ - An array containing all files, which should be loaded
-     * @param {String} filesList_.t - The type of file
-     * @param {String} filesList_.p - The name of the file
-     * @param {Object} filesList_.i - Additional information
      */
     import: function(paths_, types_, filesList_, flg_ = 0) {
         var create = (tag_) => { return document.createElement(tag_) };

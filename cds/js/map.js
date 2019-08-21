@@ -56,6 +56,9 @@ class Map {
         return (this.grid[mapGridIndex.x][mapGridIndex.y]);
     } // check
 
+    /**
+     * Cast all rays to finally render the current view.
+    */
     castRays() {
         var xIt = 0;
 
@@ -78,7 +81,7 @@ class Map {
     } // castRays
 
     /**
-     * Render the map using raycasting.
+     * Render the map using the rays.
      */
     render() {
         // loop every ray in the array of rays
@@ -116,7 +119,7 @@ class Map {
     } // render
 
     /**
-     * Render the minimap on the canvas.
+     * Render the minimap.
      */
     renderMinimap() {
         for (let xIt = 0; xIt < this.size.x; xIt++) {

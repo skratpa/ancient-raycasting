@@ -20,8 +20,7 @@
 
 		{ "t": "style", "p": "main"											},
 
-		{ "t": "script", "p": "basics" 										},
-		{ "t": "script", "p": "clients" 									},
+		{ "t": "script", "p": "player" 										},
 		{ "t": "script", "p": "game" 										},
 		{ "t": "script", "p": "input" 										},
 

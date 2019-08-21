@@ -41,6 +41,11 @@ class Ray {
         this.isRayFacingLeft = !this.isRayFacingRight;
     } // constructor
 
+    /**
+     * Cast this ray and check if it's colliding with a wall.
+     *
+     * @param {Number} columnId - The id of the current column
+    */
     cast(columnId) {
         var intercept = { x: 0, y: 0 };
         var step = { x: 0, y: 0 };
